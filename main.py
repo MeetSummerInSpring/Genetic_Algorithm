@@ -1,10 +1,11 @@
 from function import *
 import matplotlib.pyplot as plt
+from tqdm import tqdm, trange
 
-calculate_limit = 10  # 迭代次数
+calculate_limit = 100  # 迭代次数
 
-population_size = 20  # 种群数量
-chrom_length = 7  # 染色体长度
+population_size = 50  # 种群数量
+chrom_length = 10  # 染色体长度
 
 elimination_rate = 0.4  # 多少比例后的个体可能被淘汰
 elimination_prob = 0.5  # 比例内个体被淘汰的概率
@@ -21,8 +22,8 @@ gene_max = 10  # 基因最大值
 
 # 真实函数
 def func(x):
-    return 10 * np.sin(5 * x) + 7 * np.cos(4 * x)
-    # return 20 * np.exp(-x) * np.sin(x)
+    # return 10 * np.sin(5 * x) + 7 * np.cos(4 * x)
+    return 20 * np.exp(-x) * np.sin(x)
 
 
 # 初始化
@@ -34,7 +35,7 @@ best_Y = []
 avg_Y = []
 population_chroms = np.array(chroms_encoding(population_size, chrom_length))
 
-for i in range(calculate_limit):
+for i in trange(calculate_limit):
     # 评估适应度 TODO:加入上下限控制 OK
     population_chroms_ture, population_values = \
         evaluate(population_chroms, func, chrom_length, gene_min, gene_max)
@@ -47,7 +48,7 @@ for i in range(calculate_limit):
 
     # 自然选择：精英淘汰+优等复制
     population_chroms = select(population_chroms, population_values,
-                               elimination_rate, elimination_prob)
+                               population_size)
     # 交配
     population_chroms = crossover_mating(population_chroms, chrom_length,
                                          mating_rate, exchange_rate)

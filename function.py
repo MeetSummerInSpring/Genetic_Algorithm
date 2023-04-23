@@ -54,8 +54,8 @@ def evaluate(pop_chroms, func, chrom_length, gene_min=0, gene_max=10):
     return pop_chroms_ture, population_values
 
 
-# 繁衍 适应度越高 后代数量多的概率更大 轮盘赌筛选
-def select(pop_chroms, population_values, elimination_rate, elimination_prob):
+# 繁衍 适应度越高 后代数量多的概率更大 轮盘赌筛选 种群数量不变！
+def select(pop_chroms, population_values, population_size):
     # # 淘汰
     # # TODO: population_values 应该都为正数 OK
     # pop_chroms_ = []
@@ -95,7 +95,7 @@ def select(pop_chroms, population_values, elimination_rate, elimination_prob):
 
     # 轮盘赌加入新个体 成为新种群
     new_pop_chroms = []
-    for i in range(len(pop_chroms)):
+    for i in range(population_size):
         rand_prob = random.random()
         # prob_k < prob < prob_{k+1}
         chrom_selected = bisect(population_sum_probs, rand_prob)
@@ -117,20 +117,27 @@ def crossover_mating(pop_chroms, chrom_length, mating_rate, exchange_rate):
     population_len = len(pop_chroms)
 
     for i in range(population_len):
-        mating_prob = random.random()
-
         # 第i个体交配
-        if mating_prob > mating_rate:
+        if random.random() > mating_rate:
             child1 = pop_chroms[i]  # female
             child2 = pop_chroms[random.randint(0, population_len - 1)]  # male
 
-            # 两个子代的基因交换
-            for j in range(chrom_length):
-                exchange_prob = random.random()
+            gene_min = random.randint(0, chrom_length - 1)
+            gene_max = random.randint(0, chrom_length - 1)
+            if gene_max < gene_min:
+                gene_min, gene_max = gene_max, gene_min
 
-                # 第j处基因交换
-                if exchange_prob > exchange_rate:
-                    child1[j], child2[j] = child2[j], child1[j]
+            # 两个子代的基因交换
+            for j in range(gene_min, gene_max + 1):
+                child1[j], child2[j] = child2[j], child1[j]
+
+            # # 两个子代的基因交换
+            # for j in range(chrom_length):
+            #     exchange_prob = random.random()
+            #
+            #     # 第j处基因交换
+            #     if exchange_prob > exchange_rate:
+            #         child1[j], child2[j] = child2[j], child1[j]
 
             pop_chroms.append(child1)
             pop_chroms.append(child2)
@@ -151,12 +158,21 @@ def mutation(pop_chroms, chrom_length, mutation_rate):
     """
     # 用item不能给list赋值
     for i in range(len(pop_chroms)):
-        for j in range(chrom_length):
-            mutation_prob = random.random()
-            if mutation_prob > mutation_rate:
-                if pop_chroms[i][j] == 1:
-                    pop_chroms[i][j] = 0
-                else:
-                    pop_chroms[i][j] = 1
+        # 单个基因变异
+        if random.random() < mutation_rate:
+            gene_mut = random.randint(0, chrom_length - 1)
+            if pop_chroms[i][gene_mut] == 1:
+                pop_chroms[i][gene_mut] = 0
+            else:
+                pop_chroms[i][gene_mut] = 1
+
+        # # 在染色体内遍历每个基因并判断是否需要变异
+        # for j in range(chrom_length):
+        #     mutation_prob = random.random()
+        #     if mutation_prob > mutation_rate:
+        #         if pop_chroms[i][j] == 1:
+        #             pop_chroms[i][j] = 0
+        #         else:
+        #             pop_chroms[i][j] = 1
 
     return pop_chroms

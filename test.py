@@ -10,6 +10,7 @@ a1[1] = 10
 print(a1)
 print(a2)
 
+
 def func(x):
     return 10 * np.exp(-x) * np.sin(x)
 
