@@ -17,8 +17,8 @@ def chroms_encoding(population_size, chrom_length):
     return pop_chroms
 
 
-# 单个基因的解码
-def gene_decoding(chrom):
+# 单个染色体的解码
+def chrome_decoding(chrom):
     chrom_unnor = 0
 
     for i in range(len(chrom)):
@@ -37,7 +37,7 @@ def evaluate(pop_chroms, func, chrom_length, gene_min=0, gene_max=10):
 
     for chrom in pop_chroms:
         # 十进制数
-        chrom_unnor = gene_decoding(chrom)
+        chrom_unnor = chrome_decoding(chrom)
         # 对x做归一变化 规范定义域 TODO:范围以外是否舍去 OK
         chrom_true = scale / (math.pow(2, chrom_length) - 1) * (chrom_unnor - 0) + gene_min
 
@@ -76,9 +76,10 @@ def select(pop_chroms, population_values, population_size):
     # population_values = population_values_
 
     # 根据个体适应度计算个体繁衍概率 TODO:有负值
-    value_sum = sum(population_values)
+    population_values_ = np.exp(population_values)
+    value_sum = sum(population_values_)
     population_probs = []
-    for value in population_values:
+    for value in population_values_:
         population_probs.append(value / value_sum)
 
     # 排序 不加np不能直接索引转数组
@@ -98,6 +99,7 @@ def select(pop_chroms, population_values, population_size):
     for i in range(population_size):
         rand_prob = random.random()
         # prob_k < prob < prob_{k+1}
+        # TODO: 直接使用二分查找的返回值 有可能溢出列表
         chrom_selected = bisect(population_sum_probs, rand_prob)
         new_pop_chroms.append(pop_chroms[chrom_selected])
 
@@ -105,7 +107,8 @@ def select(pop_chroms, population_values, population_size):
 
 
 # 交配
-def crossover_mating(pop_chroms, chrom_length, mating_rate, exchange_rate):
+def crossover_mating(pop_chroms, chrom_length, mating_rate):
+    # exchange_rate
     """
 
     :param pop_chroms: 种群基因
